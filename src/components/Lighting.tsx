@@ -15,6 +15,7 @@ export default function Lighting() {
         position={[5, 5, 5]}
         intensity={0.5}
         castShadow
+        color="#ffffff"
       />
     </>
   );

@@ -51,7 +51,7 @@ export default function CameraController() {
       mouseY.current = -(event.clientY / window.innerHeight) * 2 + 1;
 
       // Calculate rotation based on mouse delta
-      const rotationSpeed = 0.005;
+      const rotationSpeed = 0.001;
       targetRotationY.current += deltaX * rotationSpeed;
       targetRotationX.current += deltaY * rotationSpeed;
 
