@@ -5,6 +5,12 @@ import { createContext, useContext, useState, ReactNode } from "react";
 
 export type SurfaceType = 'wall1' | 'wall2' | 'wall3' | 'wall4' | 'floor';
 
+interface RoomDimensions {
+  width: number;
+  height: number;
+  depth: number;
+}
+
 interface TextureContextType {
   selectedSurface: SurfaceType | null;
   setSelectedSurface: (surface: SurfaceType | null) => void;
@@ -15,6 +21,8 @@ interface TextureContextType {
   clearPendingTexture: (surface: SurfaceType) => void;
   wallTextures: string[];
   floorTextures: string[];
+  roomDimensions: RoomDimensions;
+  setRoomDimensions: (dimensions: RoomDimensions) => void;
 }
 
 const TextureContext = createContext<TextureContextType | undefined>(undefined);
@@ -42,6 +50,12 @@ interface TextureProviderProps {
 
 export function TextureProvider({ children }: TextureProviderProps) {
   const [selectedSurface, setSelectedSurface] = useState<SurfaceType | null>(null);
+  const [roomDimensions, setRoomDimensions] = useState<RoomDimensions>({
+    width: 15,
+    height: 8,
+    depth: 15
+  });
+
   const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, string>>({
     wall1: "/textures/walls/wall1.png",
     wall2: "/textures/walls/wall1.png", 
@@ -100,7 +114,9 @@ export function TextureProvider({ children }: TextureProviderProps) {
       setPendingTexture,
       clearPendingTexture,
       wallTextures: WALL_TEXTURES,
-      floorTextures: FLOOR_TEXTURES
+      floorTextures: FLOOR_TEXTURES,
+      roomDimensions,
+      setRoomDimensions
     }}>
       {children}
     </TextureContext.Provider>

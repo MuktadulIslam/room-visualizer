@@ -2,7 +2,6 @@
 "use client";
 
 import { useTexture, SurfaceType } from "@/contexts/TextureContext";
-
 export default function TextureSelectionPanel() {
   const { 
     selectedSurface, 
@@ -10,7 +9,7 @@ export default function TextureSelectionPanel() {
     setTexture, 
     wallTextures, 
     floorTextures,
-    setSelectedSurface 
+    setSelectedSurface,
   } = useTexture();
 
   if (!selectedSurface) return null;
@@ -46,14 +45,14 @@ export default function TextureSelectionPanel() {
   return (
     <div className={`
       fixed top-0 right-0 h-full w-80 bg-gray-900 text-white shadow-xl 
-      transform transition-transform duration-300 ease-in-out z-50
+      transform transition-transform duration-300 ease-in-out z-50 pointer-events-auto
       ${selectedSurface ? 'translate-x-0' : 'translate-x-full'}
     `}>
       {/* Header */}
       <div className="p-4 border-b border-gray-700">
         <div className="flex justify-between items-center">
           <h2 className="text-lg font-bold">
-            Texture Options
+            Room Designer
           </h2>
           <button
             onClick={handleClose}
@@ -68,7 +67,7 @@ export default function TextureSelectionPanel() {
       </div>
 
       {/* Content */}
-      <div className="p-4 h-full overflow-y-auto">
+      <div className="p-4 h-full overflow-y-auto pb-20">
         {/* Current selection indicator */}
         <div className="mb-6 p-3 bg-gray-800 rounded-lg">
           <div className="text-sm text-gray-400 mb-2">Current texture:</div>
