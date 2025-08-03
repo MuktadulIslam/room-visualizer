@@ -9,7 +9,10 @@ interface TextureContextType {
   selectedSurface: SurfaceType | null;
   setSelectedSurface: (surface: SurfaceType | null) => void;
   currentTextures: Record<SurfaceType, string>;
+  pendingTextures: Record<SurfaceType, string | null>;
   setTexture: (surface: SurfaceType, texture: string) => void;
+  setPendingTexture: (surface: SurfaceType, texture: string) => void;
+  clearPendingTexture: (surface: SurfaceType) => void;
   wallTextures: string[];
   floorTextures: string[];
 }
@@ -47,11 +50,44 @@ export function TextureProvider({ children }: TextureProviderProps) {
     floor: "/textures/floors/floor2.jpg"
   });
 
+  const [pendingTextures, setPendingTexturesState] = useState<Record<SurfaceType, string | null>>({
+    wall1: null,
+    wall2: null,
+    wall3: null,
+    wall4: null,
+    floor: null
+  });
+
   const setTexture = (surface: SurfaceType, texture: string) => {
-    setCurrentTextures(prev => ({
+    // Don't set if it's the same texture
+    if (currentTextures[surface] === texture) return;
+    
+    // Set as pending first
+    setPendingTexture(surface, texture);
+  };
+
+  const setPendingTexture = (surface: SurfaceType, texture: string) => {
+    setPendingTexturesState(prev => ({
       ...prev,
       [surface]: texture
     }));
+  };
+
+  const clearPendingTexture = (surface: SurfaceType) => {
+    const pendingTexture = pendingTextures[surface];
+    if (pendingTexture) {
+      // Move pending to current
+      setCurrentTextures(prev => ({
+        ...prev,
+        [surface]: pendingTexture
+      }));
+      
+      // Clear pending
+      setPendingTexturesState(prev => ({
+        ...prev,
+        [surface]: null
+      }));
+    }
   };
 
   return (
@@ -59,7 +95,10 @@ export function TextureProvider({ children }: TextureProviderProps) {
       selectedSurface,
       setSelectedSurface,
       currentTextures,
+      pendingTextures,
       setTexture,
+      setPendingTexture,
+      clearPendingTexture,
       wallTextures: WALL_TEXTURES,
       floorTextures: FLOOR_TEXTURES
     }}>

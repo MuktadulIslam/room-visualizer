@@ -14,6 +14,9 @@ export default function Scene() {
   return (
     <TextureProvider>
       <div className="w-full h-screen bg-black relative">
+        {/* Texture Selection Modal */}
+        <TextureSelectionPanel />
+
         <Canvas
           camera={{
             fov: 75,
@@ -28,9 +31,6 @@ export default function Scene() {
             <CameraController />
           </Suspense>
         </Canvas>
-        
-        {/* Texture Selection Modal */}
-        <TextureSelectionPanel />
       </div>
     </TextureProvider>
   );

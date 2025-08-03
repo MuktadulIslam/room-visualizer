@@ -3,6 +3,8 @@
 
 import { Html } from "@react-three/drei";
 import { useTexture, SurfaceType } from "@/contexts/TextureContext";
+import { useRef } from "react";
+import { Mesh } from "three";
 
 interface InteractiveSurfaceProps {
   children: React.ReactNode;
@@ -17,6 +19,7 @@ export default function InteractiveSurface({
   position,
   rotation 
 }: InteractiveSurfaceProps) {
+  const meshRef = useRef<Mesh>(null);
   const { 
     selectedSurface, 
     setSelectedSurface 
@@ -54,17 +57,9 @@ export default function InteractiveSurface({
 
   return (
     <group position={position} rotation={rotation}>
-      <mesh>
+      {/* Main surface mesh */}
+      <mesh ref={meshRef}>
         {children}
-        {/* Highlight overlay when selected */}
-        {isSelected && (
-          <meshBasicMaterial 
-            color="#00ff00" 
-            transparent 
-            opacity={0.1}
-            depthWrite={false}
-          />
-        )}
       </mesh>
 
       {/* Fixed radio button */}
@@ -73,6 +68,7 @@ export default function InteractiveSurface({
         center
         style={{
           pointerEvents: 'auto',
+          zIndex: 1,
         }}
       >
         <div 
