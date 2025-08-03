@@ -4,7 +4,8 @@
 import { useTexture as useThreeTexture } from "@react-three/drei";
 import { DoubleSide } from "three";
 import { useTexture, SurfaceType } from "@/contexts/TextureContext";
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useRef } from "react";
+import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
 
 interface TexturedSurfaceProps {
@@ -18,19 +19,17 @@ function TextureLayer({
   texturePath, 
   opacity, 
   dimensions,
-  onLoad 
+  zOffset = 0
 }: { 
   texturePath: string; 
   opacity: number; 
   dimensions: [number, number];
-  onLoad?: () => void;
+  zOffset?: number;
 }) {
-  const texture = useThreeTexture(texturePath, (loadedTexture) => {
-    if (onLoad) onLoad();
-  });
+  const texture = useThreeTexture(texturePath);
 
   return (
-    <mesh>
+    <mesh position={[0, 0, zOffset]}>
       <planeGeometry args={dimensions} />
       <meshStandardMaterial 
         map={texture} 
@@ -42,43 +41,6 @@ function TextureLayer({
   );
 }
 
-function LoadingOverlay({ surfaceType }: { surfaceType: SurfaceType }) {
-  const getSurfaceLabel = (type: SurfaceType) => {
-    switch(type) {
-      case 'wall1': return 'Front Wall';
-      case 'wall2': return 'Back Wall';
-      case 'wall3': return 'Left Wall';
-      case 'wall4': return 'Right Wall';
-      case 'floor': return 'Floor';
-      default: return type;
-    }
-  };
-
-  const isFloor = surfaceType === 'floor';
-
-  return (
-    <Html 
-      center
-      position={[0, 0, 0.01]}
-      style={{
-        zIndex: 1,
-      }}
-    >
-      <div className="bg-black/90 backdrop-blur-sm px-4 py-3 rounded-lg border border-blue-500 shadow-lg">
-        <div className="flex items-center space-x-3 text-white">
-          <div className="animate-spin w-5 h-5 border-2 border-blue-400 border-t-transparent rounded-full"></div>
-          <div>
-            <div className="text-sm font-medium">
-              Loading {isFloor ? 'floor' : 'wall'} texture...
-            </div>
-            <div className="text-xs text-gray-300">{getSurfaceLabel(surfaceType)}</div>
-          </div>
-        </div>
-      </div>
-    </Html>
-  );
-}
-
 function SurfaceContent({ 
   surfaceType, 
   dimensions 
@@ -86,91 +48,57 @@ function SurfaceContent({
   surfaceType: SurfaceType; 
   dimensions: [number, number] 
 }) {
-  const { currentTextures, pendingTextures, clearPendingTexture } = useTexture();
-  const [isTransitioning, setIsTransitioning] = useState(false);
-  const [oldOpacity, setOldOpacity] = useState(1);
-  const [newOpacity, setNewOpacity] = useState(0);
-  const [showLoading, setShowLoading] = useState(false);
+  const { currentTextures, getTransition } = useTexture();
+  const isLoadingRef = useRef(false);
   
   const currentTexture = currentTextures[surfaceType];
-  const pendingTexture = pendingTextures[surfaceType];
-  
-  // Handle texture transitions
-  useEffect(() => {
-    if (pendingTexture && pendingTexture !== currentTexture) {
-      setShowLoading(true);
-      setIsTransitioning(true);
-    }
-  }, [pendingTexture, currentTexture]);
+  const transition = getTransition(surfaceType);
 
-  const handleNewTextureLoaded = () => {
-    setShowLoading(false);
-    
-    // Start transition: fade out old, fade in new
-    setOldOpacity(1);
-    setNewOpacity(0);
-    
-    // Fade out old texture
-    const fadeOutInterval = setInterval(() => {
-      setOldOpacity(prev => {
-        const newValue = prev - 0.1;
-        if (newValue <= 0) {
-          clearInterval(fadeOutInterval);
-          
-          // Start fading in new texture
-          const fadeInInterval = setInterval(() => {
-            setNewOpacity(prev => {
-              const newValue = prev + 0.1;
-              if (newValue >= 1) {
-                clearInterval(fadeInInterval);
-                // Transition complete
-                setIsTransitioning(false);
-                setOldOpacity(1);
-                setNewOpacity(0);
-                clearPendingTexture(surfaceType);
-                return 1;
-              }
-              return newValue;
-            });
-          }, 20);
-          
-          return 0;
-        }
-        return newValue;
-      });
-    }, 20);
-  };
+  // Use frame loop to check for transitions without causing re-renders
+  useFrame(() => {
+    if (transition && transition.isTransitioning) {
+      // Transition is happening, component will re-render naturally due to animation
+    }
+  });
 
   return (
     <>
-      {/* Current/Old texture layer */}
+      {/* Current texture layer */}
       <Suspense fallback={null}>
         <TextureLayer 
           texturePath={currentTexture}
-          opacity={isTransitioning ? oldOpacity : 1}
+          opacity={transition ? 1 - transition.progress : 1}
           dimensions={dimensions}
+          zOffset={0}
         />
       </Suspense>
 
-      {/* New texture layer (only shown during transition) */}
-      {isTransitioning && pendingTexture && (
-        <group position={[0, 0, 0.001]}>
-          <Suspense fallback={null}>
-            <TextureLayer 
-              texturePath={pendingTexture}
-              opacity={newOpacity}
-              dimensions={dimensions}
-              onLoad={handleNewTextureLoaded}
-            />
-          </Suspense>
-        </group>
+      {/* New texture layer (only during transition) */}
+      {transition && transition.isTransitioning && (
+        <Suspense fallback={null}>
+          <TextureLayer 
+            texturePath={transition.newTexture}
+            opacity={transition.progress}
+            dimensions={dimensions}
+            zOffset={0.001}
+          />
+        </Suspense>
       )}
 
-      {/* Loading overlay */}
-      {showLoading && (
-        <group position={[0, 0, 0.002]}>
-          <LoadingOverlay surfaceType={surfaceType} />
-        </group>
+      {/* Simple loading indicator - only show briefly */}
+      {transition && transition.progress === 0 && (
+        <Html 
+          center
+          position={[0, 0, 0.01]}
+          style={{ zIndex: 1 }}
+        >
+          <div className="bg-black/80 backdrop-blur-sm px-3 py-2 rounded-lg border border-blue-500">
+            <div className="flex items-center space-x-2 text-white">
+              <div className="animate-spin w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full"></div>
+              <span className="text-xs">Loading...</span>
+            </div>
+          </div>
+        </Html>
       )}
     </>
   );

@@ -1,7 +1,7 @@
 // src/contexts/TextureContext.tsx
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, ReactNode, useRef, useCallback } from "react";
 
 export type SurfaceType = 'wall1' | 'wall2' | 'wall3' | 'wall4' | 'floor';
 
@@ -11,14 +11,19 @@ interface RoomDimensions {
   depth: number;
 }
 
+interface TextureTransition {
+  isTransitioning: boolean;
+  oldTexture: string;
+  newTexture: string;
+  progress: number;
+}
+
 interface TextureContextType {
   selectedSurface: SurfaceType | null;
   setSelectedSurface: (surface: SurfaceType | null) => void;
   currentTextures: Record<SurfaceType, string>;
-  pendingTextures: Record<SurfaceType, string | null>;
   setTexture: (surface: SurfaceType, texture: string) => void;
-  setPendingTexture: (surface: SurfaceType, texture: string) => void;
-  clearPendingTexture: (surface: SurfaceType) => void;
+  getTransition: (surface: SurfaceType) => TextureTransition | null;
   wallTextures: string[];
   floorTextures: string[];
   roomDimensions: RoomDimensions;
@@ -64,7 +69,8 @@ export function TextureProvider({ children }: TextureProviderProps) {
     floor: "/textures/floors/floor2.jpg"
   });
 
-  const [pendingTextures, setPendingTexturesState] = useState<Record<SurfaceType, string | null>>({
+  // Use refs to track transitions without causing re-renders
+  const transitionsRef = useRef<Record<SurfaceType, TextureTransition | null>>({
     wall1: null,
     wall2: null,
     wall3: null,
@@ -72,47 +78,73 @@ export function TextureProvider({ children }: TextureProviderProps) {
     floor: null
   });
 
-  const setTexture = (surface: SurfaceType, texture: string) => {
+  const animationFrameRef = useRef<Record<SurfaceType, number | null>>({
+    wall1: null,
+    wall2: null,
+    wall3: null,
+    wall4: null,
+    floor: null
+  });
+
+  const setTexture = useCallback((surface: SurfaceType, texture: string) => {
     // Don't set if it's the same texture
     if (currentTextures[surface] === texture) return;
     
-    // Set as pending first
-    setPendingTexture(surface, texture);
-  };
-
-  const setPendingTexture = (surface: SurfaceType, texture: string) => {
-    setPendingTexturesState(prev => ({
-      ...prev,
-      [surface]: texture
-    }));
-  };
-
-  const clearPendingTexture = (surface: SurfaceType) => {
-    const pendingTexture = pendingTextures[surface];
-    if (pendingTexture) {
-      // Move pending to current
-      setCurrentTextures(prev => ({
-        ...prev,
-        [surface]: pendingTexture
-      }));
-      
-      // Clear pending
-      setPendingTexturesState(prev => ({
-        ...prev,
-        [surface]: null
-      }));
+    // Cancel any existing animation for this surface
+    if (animationFrameRef.current[surface]) {
+      cancelAnimationFrame(animationFrameRef.current[surface]!);
     }
-  };
+
+    const oldTexture = currentTextures[surface];
+    
+    // Start transition immediately
+    transitionsRef.current[surface] = {
+      isTransitioning: true,
+      oldTexture,
+      newTexture: texture,
+      progress: 0
+    };
+
+    // Quick transition using requestAnimationFrame
+    const startTime = performance.now();
+    const duration = 300; // 300ms transition
+
+    const animate = (currentTime: number) => {
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / duration, 1);
+
+      if (transitionsRef.current[surface]) {
+        transitionsRef.current[surface]!.progress = progress;
+      }
+
+      if (progress < 1) {
+        animationFrameRef.current[surface] = requestAnimationFrame(animate);
+      } else {
+        // Transition complete
+        setCurrentTextures(prev => ({
+          ...prev,
+          [surface]: texture
+        }));
+        
+        transitionsRef.current[surface] = null;
+        animationFrameRef.current[surface] = null;
+      }
+    };
+
+    animationFrameRef.current[surface] = requestAnimationFrame(animate);
+  }, [currentTextures]);
+
+  const getTransition = useCallback((surface: SurfaceType): TextureTransition | null => {
+    return transitionsRef.current[surface];
+  }, []);
 
   return (
     <TextureContext.Provider value={{
       selectedSurface,
       setSelectedSurface,
       currentTextures,
-      pendingTextures,
       setTexture,
-      setPendingTexture,
-      clearPendingTexture,
+      getTransition,
       wallTextures: WALL_TEXTURES,
       floorTextures: FLOOR_TEXTURES,
       roomDimensions,
