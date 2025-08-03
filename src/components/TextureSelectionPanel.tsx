@@ -3,11 +3,11 @@
 
 import { useTexture, SurfaceType } from "@/contexts/TextureContext";
 export default function TextureSelectionPanel() {
-  const { 
-    selectedSurface, 
-    currentTextures, 
-    setTexture, 
-    wallTextures, 
+  const {
+    selectedSurface,
+    currentTextures,
+    setTexture,
+    wallTextures,
     floorTextures,
     setSelectedSurface,
   } = useTexture();
@@ -19,7 +19,7 @@ export default function TextureSelectionPanel() {
   const currentTexture = currentTextures[selectedSurface];
 
   const getSurfaceLabel = (type: SurfaceType) => {
-    switch(type) {
+    switch (type) {
       case 'wall1': return 'Front Wall';
       case 'wall2': return 'Back Wall';
       case 'wall3': return 'Left Wall';
@@ -56,9 +56,12 @@ export default function TextureSelectionPanel() {
           </h2>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-white text-xl w-8 h-8 flex items-center justify-center rounded"
+            className="text-gray-400 hover:text-white hover:rotate-180 transition-all duration-300 w-10 h-10 flex items-center justify-center rounded"
           >
-            ×
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="size-6">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+            </svg>
+
           </button>
         </div>
         <div className="text-sm text-gray-400 mt-1">
@@ -72,8 +75,8 @@ export default function TextureSelectionPanel() {
         <div className="mb-6 p-3 bg-gray-800 rounded-lg">
           <div className="text-sm text-gray-400 mb-2">Current texture:</div>
           <div className="flex items-center space-x-3">
-            <img 
-              src={currentTexture} 
+            <img
+              src={currentTexture}
               alt="Current texture"
               className="w-12 h-12 object-cover rounded border-2 border-green-500"
               onError={(e) => {
@@ -102,13 +105,13 @@ export default function TextureSelectionPanel() {
               onClick={() => handleTextureSelect(texture)}
               className={`
                 w-full flex items-center space-x-3 p-3 rounded-lg border-2 transition-all
-                ${currentTexture === texture 
-                  ? 'border-green-500 bg-green-500/10' 
+                ${currentTexture === texture
+                  ? 'border-green-500 bg-green-500/10'
                   : 'border-gray-600 hover:border-gray-500 bg-gray-800/50'
                 }
               `}
             >
-              <img 
+              <img
                 src={texture}
                 alt={getTextureName(texture)}
                 className="w-16 h-16 object-cover rounded border"

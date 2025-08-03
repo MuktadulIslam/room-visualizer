@@ -12,3 +12,36 @@ body {
 * {
   box-sizing: border-box;
 }
+
+
+
+/* start:::scroll bar design */
+::-webkit-scrollbar {
+  height: 2px;
+  width: 2px;
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.h-2-scrollbar::-webkit-scrollbar {
+  height: 2px;
+}
+
+.h-4-scrollbar::-webkit-scrollbar {
+  height: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background: none;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bebdbd;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #bebdbd;
+}
+/* end:::scroll bar design */

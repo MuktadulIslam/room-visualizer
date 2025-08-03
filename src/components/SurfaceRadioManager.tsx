@@ -94,7 +94,12 @@ export default function SurfaceRadioManager() {
   };
 
   const handleRadioChange = (surfaceType: SurfaceType) => {
-    setSelectedSurface(surfaceType);
+    // Toggle behavior: if clicking on already selected surface, unselect it
+    if (selectedSurface === surfaceType) {
+      setSelectedSurface(null);
+    } else {
+      setSelectedSurface(surfaceType);
+    }
   };
 
   // Find the most visible surface to show only one button
@@ -136,7 +141,7 @@ export default function SurfaceRadioManager() {
               className="form-radio text-green-500 w-5 h-5 pointer-events-none"
             />
             <span className="text-base font-medium whitespace-nowrap">
-              {isFloor ? 'Change Floor' : 'Change Wall'}
+              {isSelected ? 'Close Panel' : (isFloor ? 'Change Floor' : 'Change Wall')}
             </span>
           </div>
           <div className="text-sm text-gray-300 mt-2 text-center font-medium">
