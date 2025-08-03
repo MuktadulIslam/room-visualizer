@@ -1,21 +1,25 @@
 // src/components/Room.tsx
 "use client";
 
-import { useTexture } from "@react-three/drei";
+import { useTexture as useThreeTexture } from "@react-three/drei";
 import { DoubleSide } from "three";
+import { useTexture } from "@/contexts/TextureContext";
+import InteractiveSurface from "./InteractiveSurface";
 
 interface RoomProps {
   size?: number;
 }
 
 export default function Room({ size = 10 }: RoomProps) {
-  // Load textures
-  const [wall1, wall2, wall3, wall4, floor] = useTexture([
-    "/wall1.png",
-    "/wall2.png",
-    "/wall3.png",
-    "/wall4.png",
-    "/floor.png",
+  const { currentTextures } = useTexture();
+  
+  // Load textures using current texture URLs from context
+  const [wall1, wall2, wall3, wall4, floor] = useThreeTexture([
+    currentTextures.wall1,
+    currentTextures.wall2,
+    currentTextures.wall3, 
+    currentTextures.wall4,
+    currentTextures.floor,
   ]);
 
   const halfSize = size / 2;
@@ -23,10 +27,14 @@ export default function Room({ size = 10 }: RoomProps) {
   return (
     <group>
       {/* Floor */}
-      <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -halfSize, 0]}>
+      <InteractiveSurface 
+        surfaceType="floor" 
+        position={[0, -halfSize, 0]}
+        rotation={[-Math.PI / 2, 0, 0]}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial map={floor} side={DoubleSide} />
-      </mesh>
+      </InteractiveSurface>
 
       {/* Ceiling */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, halfSize, 0]}>
@@ -35,28 +43,43 @@ export default function Room({ size = 10 }: RoomProps) {
       </mesh>
 
       {/* Front Wall (wall1) */}
-      <mesh position={[0, 0, -halfSize]}>
+      <InteractiveSurface 
+        surfaceType="wall1" 
+        position={[0, 0, -halfSize]}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial map={wall1} side={DoubleSide} />
-      </mesh>
+      </InteractiveSurface>
 
       {/* Back Wall (wall2) */}
-      <mesh rotation={[0, Math.PI, 0]} position={[0, 0, halfSize]}>
+      <InteractiveSurface 
+        surfaceType="wall2" 
+        position={[0, 0, halfSize]}
+        rotation={[0, Math.PI, 0]}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial map={wall2} side={DoubleSide} />
-      </mesh>
+      </InteractiveSurface>
 
       {/* Left Wall (wall3) */}
-      <mesh rotation={[0, Math.PI / 2, 0]} position={[-halfSize, 0, 0]}>
+      <InteractiveSurface 
+        surfaceType="wall3" 
+        position={[-halfSize, 0, 0]}
+        rotation={[0, Math.PI / 2, 0]}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial map={wall3} side={DoubleSide} />
-      </mesh>
+      </InteractiveSurface>
 
       {/* Right Wall (wall4) */}
-      <mesh rotation={[0, -Math.PI / 2, 0]} position={[halfSize, 0, 0]}>
+      <InteractiveSurface 
+        surfaceType="wall4" 
+        position={[halfSize, 0, 0]}
+        rotation={[0, -Math.PI / 2, 0]}
+      >
         <planeGeometry args={[size, size]} />
         <meshStandardMaterial map={wall4} side={DoubleSide} />
-      </mesh>
+      </InteractiveSurface>
     </group>
   );
 }
