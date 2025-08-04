@@ -3,7 +3,7 @@
 
 import { useTexture as useThreeTexture } from "@react-three/drei";
 import { DoubleSide } from "three";
-import { useTexture, SurfaceType } from "@/contexts/TextureContext";
+import { useTexture, SurfaceType, TextureOption } from "@/contexts/TextureContext";
 import { Suspense, useRef } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
@@ -15,7 +15,31 @@ interface TexturedSurfaceProps {
   dimensions: [number, number]; // [width, height] for walls, [width, depth] for floor
 }
 
-function TextureLayer({ 
+function ColorLayer({ 
+  color, 
+  opacity, 
+  dimensions,
+  zOffset = 0
+}: { 
+  color: string; 
+  opacity: number; 
+  dimensions: [number, number];
+  zOffset?: number;
+}) {
+  return (
+    <mesh position={[0, 0, zOffset]}>
+      <planeGeometry args={dimensions} />
+      <meshStandardMaterial 
+        color={color}
+        side={DoubleSide} 
+        transparent
+        opacity={opacity}
+      />
+    </mesh>
+  );
+}
+
+function ImageLayer({ 
   texturePath, 
   opacity, 
   dimensions,
@@ -41,6 +65,47 @@ function TextureLayer({
   );
 }
 
+function TextureLayer({ 
+  textureOption, 
+  opacity, 
+  dimensions,
+  zOffset = 0
+}: { 
+  textureOption: TextureOption; 
+  opacity: number; 
+  dimensions: [number, number];
+  zOffset?: number;
+}) {
+  if (textureOption.type === 'color') {
+    return (
+      <ColorLayer
+        color={textureOption.value}
+        opacity={opacity}
+        dimensions={dimensions}
+        zOffset={zOffset}
+      />
+    );
+  } else {
+    return (
+      <Suspense fallback={
+        <ColorLayer
+          color="#cccccc"
+          opacity={opacity}
+          dimensions={dimensions}
+          zOffset={zOffset}
+        />
+      }>
+        <ImageLayer
+          texturePath={textureOption.value}
+          opacity={opacity}
+          dimensions={dimensions}
+          zOffset={zOffset}
+        />
+      </Suspense>
+    );
+  }
+}
+
 function SurfaceContent({ 
   surfaceType, 
   dimensions 
@@ -64,29 +129,25 @@ function SurfaceContent({
   return (
     <>
       {/* Current texture layer */}
-      <Suspense fallback={null}>
-        <TextureLayer 
-          texturePath={currentTexture}
-          opacity={transition ? 1 - transition.progress : 1}
-          dimensions={dimensions}
-          zOffset={0}
-        />
-      </Suspense>
+      <TextureLayer 
+        textureOption={currentTexture}
+        opacity={transition ? 1 - transition.progress : 1}
+        dimensions={dimensions}
+        zOffset={0}
+      />
 
       {/* New texture layer (only during transition) */}
       {transition && transition.isTransitioning && (
-        <Suspense fallback={null}>
-          <TextureLayer 
-            texturePath={transition.newTexture}
-            opacity={transition.progress}
-            dimensions={dimensions}
-            zOffset={0.001}
-          />
-        </Suspense>
+        <TextureLayer 
+          textureOption={transition.newTexture}
+          opacity={transition.progress}
+          dimensions={dimensions}
+          zOffset={0.001}
+        />
       )}
 
-      {/* Simple loading indicator - only show briefly */}
-      {transition && transition.progress === 0 && (
+      {/* Simple loading indicator - only show briefly for image textures */}
+      {transition && transition.progress === 0 && transition.newTexture.type === 'image' && (
         <Html 
           center
           position={[0, 0, 0.01]}

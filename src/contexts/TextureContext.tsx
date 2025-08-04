@@ -5,6 +5,14 @@ import { createContext, useContext, useState, ReactNode, useRef, useCallback } f
 
 export type SurfaceType = 'wall1' | 'wall2' | 'wall3' | 'wall4' | 'floor';
 
+export interface TextureOption {
+  id: string;
+  name: string;
+  type: 'color' | 'image';
+  value: string; // hex color for color type, URL for image type
+  preview?: string; // Optional preview URL for images
+}
+
 interface RoomDimensions {
   width: number;
   height: number;
@@ -13,42 +21,61 @@ interface RoomDimensions {
 
 interface TextureTransition {
   isTransitioning: boolean;
-  oldTexture: string;
-  newTexture: string;
+  oldTexture: TextureOption;
+  newTexture: TextureOption;
   progress: number;
 }
 
 interface TextureContextType {
   selectedSurface: SurfaceType | null;
   setSelectedSurface: (surface: SurfaceType | null) => void;
-  currentTextures: Record<SurfaceType, string>;
-  setTexture: (surface: SurfaceType, texture: string) => void;
+  currentTextures: Record<SurfaceType, TextureOption>;
+  setTexture: (surface: SurfaceType, texture: TextureOption) => void;
   getTransition: (surface: SurfaceType) => TextureTransition | null;
-  wallTextures: string[];
-  floorTextures: string[];
+  wallTextures: TextureOption[];
+  floorTextures: TextureOption[];
   roomDimensions: RoomDimensions;
   setRoomDimensions: (dimensions: RoomDimensions) => void;
 }
 
 const TextureContext = createContext<TextureContextType | undefined>(undefined);
 
-// Predefined texture lists
-const WALL_TEXTURES = [
-  "/textures/walls/brick-wall.jpg",
-  "/textures/walls/brick-wall2.png",
-  "/textures/walls/brick-wall3.png",
-  // "/textures/walls/wood-panel.jpg", 
-  // "/textures/walls/wood-panel2.jpg", 
-  "/textures/walls/concrete.jpg",
-  "/textures/walls/marble.jpg",
-  "/textures/walls/wall1.png",
+// Predefined wall texture options (colors + images)
+const WALL_TEXTURES: TextureOption[] = [
+  // Solid Colors
+  { id: 'wall-white', name: 'White', type: 'color', value: '#ffffff' },
+  { id: 'wall-light-gray', name: 'Light Gray', type: 'color', value: '#f3f4f6' },
+  { id: 'wall-dark-gray', name: 'Dark Gray', type: 'color', value: '#6b7280' },
+  { id: 'wall-beige', name: 'Beige', type: 'color', value: '#f5f5dc' },
+  { id: 'wall-cream', name: 'Cream', type: 'color', value: '#fffdd0' },
+  { id: 'wall-light-blue', name: 'Light Blue', type: 'color', value: '#dbeafe' },
+  { id: 'wall-sage-green', name: 'Sage Green', type: 'color', value: '#9ca3af' },
+  { id: 'wall-warm-yellow', name: 'Warm Yellow', type: 'color', value: '#fef3c7' },
+  
+  // Image Textures
+  { id: 'wall-brick1', name: 'Brick Wall', type: 'image', value: '/textures/walls/brick-wall.jpg' },
+  { id: 'wall-brick2', name: 'Red Brick', type: 'image', value: '/textures/walls/brick-wall2.png' },
+  { id: 'wall-brick3', name: 'Dark Brick', type: 'image', value: '/textures/walls/brick-wall3.png' },
+  { id: 'wall-concrete', name: 'Concrete', type: 'image', value: '/textures/walls/concrete.jpg' },
+  { id: 'wall-marble', name: 'Marble', type: 'image', value: '/textures/walls/marble.jpg' },
+  { id: 'wall-texture1', name: 'Wall Texture', type: 'image', value: '/textures/walls/wall1.png' },
 ];
 
-const FLOOR_TEXTURES = [
-  "/textures/floors/floor1.jpg",
-  "/textures/floors/floor2.jpg",
-  "/textures/floors/floor3.png",
-  "/textures/floors/floor4.jpg",
+// Predefined floor texture options (colors + images)
+const FLOOR_TEXTURES: TextureOption[] = [
+  // Solid Colors
+  { id: 'floor-white', name: 'White', type: 'color', value: '#ffffff' },
+  { id: 'floor-light-gray', name: 'Light Gray', type: 'color', value: '#f9fafb' },
+  { id: 'floor-dark-gray', name: 'Dark Gray', type: 'color', value: '#374151' },
+  { id: 'floor-black', name: 'Black', type: 'color', value: '#111827' },
+  { id: 'floor-brown', name: 'Brown', type: 'color', value: '#92400e' },
+  { id: 'floor-warm-beige', name: 'Warm Beige', type: 'color', value: '#d6d3d1' },
+  
+  // Image Textures
+  { id: 'floor-wood1', name: 'Light Wood', type: 'image', value: '/textures/floors/floor1.jpg' },
+  { id: 'floor-wood2', name: 'Dark Wood', type: 'image', value: '/textures/floors/floor2.jpg' },
+  { id: 'floor-tile1', name: 'Stone Tile', type: 'image', value: '/textures/floors/floor3.png' },
+  { id: 'floor-parquet', name: 'Parquet', type: 'image', value: '/textures/floors/floor4.jpg' },
 ];
 
 interface TextureProviderProps {
@@ -63,12 +90,12 @@ export function TextureProvider({ children }: TextureProviderProps) {
     depth: 15
   });
 
-  const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, string>>({
-    wall1: "/textures/walls/brick-wall2.png",
-    wall2: "/textures/walls/wall1.png", 
-    wall3: "/textures/walls/wall1.png",
-    wall4: "/textures/walls/wall1.png",
-    floor: "/textures/floors/floor2.jpg"
+  const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, TextureOption>>({
+    wall1: WALL_TEXTURES.find(t => t.id === 'wall-brick2') || WALL_TEXTURES[0],
+    wall2: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0], 
+    wall3: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0],
+    wall4: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0],
+    floor: FLOOR_TEXTURES.find(t => t.id === 'floor-wood2') || FLOOR_TEXTURES[0]
   });
 
   // Use refs to track transitions without causing re-renders
@@ -88,9 +115,9 @@ export function TextureProvider({ children }: TextureProviderProps) {
     floor: null
   });
 
-  const setTexture = useCallback((surface: SurfaceType, texture: string) => {
+  const setTexture = useCallback((surface: SurfaceType, texture: TextureOption) => {
     // Don't set if it's the same texture
-    if (currentTextures[surface] === texture) return;
+    if (currentTextures[surface].id === texture.id) return;
     
     // Cancel any existing animation for this surface
     if (animationFrameRef.current[surface]) {
