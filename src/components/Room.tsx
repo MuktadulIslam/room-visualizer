@@ -4,6 +4,7 @@
 import { DoubleSide } from "three";
 import { useTexture } from "@/contexts/TextureContext";
 import TexturedSurface from "./TexturedSurface";
+import ImagePlanes from "./ImagePlanes";
 
 export default function Room() {
   const { roomDimensions } = useTexture();
@@ -60,6 +61,9 @@ export default function Room() {
         rotation={[0, -Math.PI / 2, 0]}
         dimensions={[depth, height]}
       />
+
+      {/* Furnitures */}
+      <ImagePlanes/>
     </group>
   );
 }

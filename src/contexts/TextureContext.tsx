@@ -35,8 +35,10 @@ const TextureContext = createContext<TextureContextType | undefined>(undefined);
 // Predefined texture lists
 const WALL_TEXTURES = [
   "/textures/walls/brick-wall.jpg",
-  "/textures/walls/wood-panel.jpg", 
-  "/textures/walls/wood-panel2.jpg", 
+  "/textures/walls/brick-wall2.png",
+  "/textures/walls/brick-wall3.png",
+  // "/textures/walls/wood-panel.jpg", 
+  // "/textures/walls/wood-panel2.jpg", 
   "/textures/walls/concrete.jpg",
   "/textures/walls/marble.jpg",
   "/textures/walls/wall1.png",
@@ -62,7 +64,7 @@ export function TextureProvider({ children }: TextureProviderProps) {
   });
 
   const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, string>>({
-    wall1: "/textures/walls/wall1.png",
+    wall1: "/textures/walls/brick-wall2.png",
     wall2: "/textures/walls/wall1.png", 
     wall3: "/textures/walls/wall1.png",
     wall4: "/textures/walls/wall1.png",
