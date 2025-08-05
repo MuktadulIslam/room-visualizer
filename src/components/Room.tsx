@@ -27,7 +27,7 @@ export default function Room() {
       {/* Ceiling - Static, no texture changes */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, halfHeight, 0]}>
         <planeGeometry args={[width, depth]} />
-        <meshStandardMaterial color="#ffffff" side={DoubleSide} />
+        <meshStandardMaterial color="#c4c0c0" side={DoubleSide} />
       </mesh>
 
       {/* Front Wall (wall1) - facing negative Z */}
