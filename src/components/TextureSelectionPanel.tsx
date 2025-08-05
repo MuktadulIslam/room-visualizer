@@ -197,18 +197,18 @@ export default function TextureSelectionPanel() {
                 <div className="flex items-center space-x-3">
                   <input
                     type="range"
-                    min="0.1"
-                    max="10"
-                    step="0.1"
+                    min=""
+                    max="40"
+                    step="1"
                     value={floorRepetition.x}
                     onChange={(e) => handleRepetitionChange('x', parseFloat(e.target.value))}
                     className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
                   />
                   <input
                     type="number"
-                    min="0.1"
-                    max="20"
-                    step="0.1"
+                    min="1"
+                    max="40"
+                    step="1"
                     value={floorRepetition.x}
                     onChange={(e) => handleRepetitionChange('x', parseFloat(e.target.value) || 1)}
                     className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-xs"
@@ -244,7 +244,7 @@ export default function TextureSelectionPanel() {
               </div>
 
               {/* Quick preset buttons */}
-              <div className="flex space-x-2">
+              <div className="flex justify-between">
                 <button
                   onClick={() => setFloorRepetition({ x: 1, y: 1 })}
                   className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
@@ -268,6 +268,12 @@ export default function TextureSelectionPanel() {
                   className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
                 >
                   8×8
+                </button>
+                <button
+                  onClick={() => setFloorRepetition({ x: 8, y: 8 })}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                >
+                  16×16
                 </button>
               </div>
             </div>
