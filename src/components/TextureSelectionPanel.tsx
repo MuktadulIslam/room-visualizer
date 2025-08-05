@@ -91,7 +91,7 @@ export default function TextureSelectionPanel() {
   const handleRepetitionChange = (axis: 'x' | 'y', value: number) => {
     const newRepetition = {
       ...floorRepetition,
-      [axis]: Math.max(0.1, Math.min(20, value)) // Clamp between 0.1 and 20
+      [axis]: Math.max(1, Math.min(40, value)) // Clamp between 1 and 40
     };
     setFloorRepetition(newRepetition);
   };
