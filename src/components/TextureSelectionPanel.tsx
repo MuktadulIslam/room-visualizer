@@ -12,6 +12,8 @@ export default function TextureSelectionPanel() {
     wallTextures,
     floorTextures,
     setSelectedSurface,
+    floorRepetition,
+    setFloorRepetition,
   } = useTexture();
   
   const [activeTab, setActiveTab] = useState<'colors' | 'images' | 'custom'>('colors');
@@ -84,6 +86,14 @@ export default function TextureSelectionPanel() {
 
   const handleClose = () => {
     setSelectedSurface(null);
+  };
+
+  const handleRepetitionChange = (axis: 'x' | 'y', value: number) => {
+    const newRepetition = {
+      ...floorRepetition,
+      [axis]: Math.max(0.1, Math.min(20, value)) // Clamp between 0.1 and 20
+    };
+    setFloorRepetition(newRepetition);
   };
 
   const renderTexturePreview = (texture: TextureOption) => {
@@ -171,6 +181,98 @@ export default function TextureSelectionPanel() {
             </div>
           </div>
         </div>
+
+        {/* Repetition Controls - Only show for floor image textures */}
+        {isFloor && currentTexture.type === 'image' && (
+          <div className="mb-6 p-4 bg-gray-800 rounded-lg">
+            <h3 className="text-sm font-medium text-white mb-3">
+              Floor Texture Repetition
+            </h3>
+            <div className="space-y-4">
+              {/* Horizontal repetition */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-2">
+                  Horizontal Repeat (X): {floorRepetition.x.toFixed(1)}
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="range"
+                    min="0.1"
+                    max="10"
+                    step="0.1"
+                    value={floorRepetition.x}
+                    onChange={(e) => handleRepetitionChange('x', parseFloat(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer slider"
+                  />
+                  <input
+                    type="number"
+                    min="0.1"
+                    max="20"
+                    step="0.1"
+                    value={floorRepetition.x}
+                    onChange={(e) => handleRepetitionChange('x', parseFloat(e.target.value) || 1)}
+                    className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Vertical repetition */}
+              <div>
+                <label className="text-xs text-gray-400 block mb-2">
+                  Vertical Repeat (Y): {floorRepetition.y.toFixed(1)}
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="range"
+                    min="1"
+                    max="40"
+                    step="1"
+                    value={floorRepetition.y}
+                    onChange={(e) => handleRepetitionChange('y', parseFloat(e.target.value))}
+                    className="flex-1 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer"
+                  />
+                  <input
+                    type="number"
+                    min="1"
+                    max="40"
+                    step="1"
+                    value={floorRepetition.y}
+                    onChange={(e) => handleRepetitionChange('y', parseFloat(e.target.value) || 1)}
+                    className="w-16 px-2 py-1 bg-gray-700 border border-gray-600 rounded text-white text-xs"
+                  />
+                </div>
+              </div>
+
+              {/* Quick preset buttons */}
+              <div className="flex space-x-2">
+                <button
+                  onClick={() => setFloorRepetition({ x: 1, y: 1 })}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                >
+                  1×1
+                </button>
+                <button
+                  onClick={() => setFloorRepetition({ x: 2, y: 2 })}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                >
+                  2×2
+                </button>
+                <button
+                  onClick={() => setFloorRepetition({ x: 4, y: 4 })}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                >
+                  4×4
+                </button>
+                <button
+                  onClick={() => setFloorRepetition({ x: 8, y: 8 })}
+                  className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded text-xs transition-colors"
+                >
+                  8×8
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Tab Navigation */}
         <div className="mb-4">

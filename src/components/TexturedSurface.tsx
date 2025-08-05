@@ -2,11 +2,12 @@
 "use client";
 
 import { useTexture as useThreeTexture } from "@react-three/drei";
-import { DoubleSide } from "three";
+import { DoubleSide, RepeatWrapping, ClampToEdgeWrapping } from "three";
 import { useTexture, SurfaceType, TextureOption } from "@/contexts/TextureContext";
-import { Suspense, useRef } from "react";
+import { Suspense, useRef, useEffect } from "react";
 import { useFrame } from "@react-three/fiber";
 import { Html } from "@react-three/drei";
+import * as THREE from "three";
 
 interface TexturedSurfaceProps {
   surfaceType: SurfaceType;
@@ -43,14 +44,36 @@ function ImageLayer({
   texturePath, 
   opacity, 
   dimensions,
+  surfaceType,
   zOffset = 0
 }: { 
   texturePath: string; 
   opacity: number; 
   dimensions: [number, number];
+  surfaceType: SurfaceType;
   zOffset?: number;
 }) {
   const texture = useThreeTexture(texturePath);
+  const { floorRepetition } = useTexture();
+  
+  useEffect(() => {
+    if (texture) {
+      if (surfaceType === 'floor') {
+        // Apply repetition only to floor
+        texture.wrapS = RepeatWrapping;
+        texture.wrapT = RepeatWrapping;
+        texture.repeat.set(floorRepetition.x, floorRepetition.y);
+      } else {
+        // Walls use default single texture (no repetition)
+        texture.wrapS = THREE.ClampToEdgeWrapping;
+        texture.wrapT = THREE.ClampToEdgeWrapping;
+        texture.repeat.set(1, 1);
+      }
+      
+      // Update the texture
+      texture.needsUpdate = true;
+    }
+  }, [texture, surfaceType, floorRepetition]);
 
   return (
     <mesh position={[0, 0, zOffset]}>
@@ -69,11 +92,13 @@ function TextureLayer({
   textureOption, 
   opacity, 
   dimensions,
+  surfaceType,
   zOffset = 0
 }: { 
   textureOption: TextureOption; 
   opacity: number; 
   dimensions: [number, number];
+  surfaceType: SurfaceType;
   zOffset?: number;
 }) {
   if (textureOption.type === 'color') {
@@ -99,6 +124,7 @@ function TextureLayer({
           texturePath={textureOption.value}
           opacity={opacity}
           dimensions={dimensions}
+          surfaceType={surfaceType}
           zOffset={zOffset}
         />
       </Suspense>
@@ -133,6 +159,7 @@ function SurfaceContent({
         textureOption={currentTexture}
         opacity={transition ? 1 - transition.progress : 1}
         dimensions={dimensions}
+        surfaceType={surfaceType}
         zOffset={0}
       />
 
@@ -142,6 +169,7 @@ function SurfaceContent({
           textureOption={transition.newTexture}
           opacity={transition.progress}
           dimensions={dimensions}
+          surfaceType={surfaceType}
           zOffset={0.001}
         />
       )}

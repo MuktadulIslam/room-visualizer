@@ -26,6 +26,11 @@ interface TextureTransition {
   progress: number;
 }
 
+interface RepetitionSettings {
+  x: number; // How many times to repeat horizontally
+  y: number; // How many times to repeat vertically
+}
+
 interface TextureContextType {
   selectedSurface: SurfaceType | null;
   setSelectedSurface: (surface: SurfaceType | null) => void;
@@ -36,6 +41,9 @@ interface TextureContextType {
   floorTextures: TextureOption[];
   roomDimensions: RoomDimensions;
   setRoomDimensions: (dimensions: RoomDimensions) => void;
+  // Floor repetition controls only
+  floorRepetition: RepetitionSettings;
+  setFloorRepetition: (repetition: RepetitionSettings) => void;
 }
 
 const TextureContext = createContext<TextureContextType | undefined>(undefined);
@@ -95,8 +103,11 @@ export function TextureProvider({ children }: TextureProviderProps) {
     wall2: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0], 
     wall3: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0],
     wall4: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0],
-    floor: FLOOR_TEXTURES.find(t => t.id === 'floor-light-brown') || FLOOR_TEXTURES[0]
+    floor: FLOOR_TEXTURES.find(t => t.id === 'floor-parquet') || FLOOR_TEXTURES[0]
   });
+
+  // Floor repetition settings only
+  const [floorRepetition, setFloorRepetition] = useState<RepetitionSettings>({ x: 25, y: 20 });
 
   // Use refs to track transitions without causing re-renders
   const transitionsRef = useRef<Record<SurfaceType, TextureTransition | null>>({
@@ -177,7 +188,9 @@ export function TextureProvider({ children }: TextureProviderProps) {
       wallTextures: WALL_TEXTURES,
       floorTextures: FLOOR_TEXTURES,
       roomDimensions,
-      setRoomDimensions
+      setRoomDimensions,
+      floorRepetition,
+      setFloorRepetition
     }}>
       {children}
     </TextureContext.Provider>
