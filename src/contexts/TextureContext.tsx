@@ -58,17 +58,17 @@ const WALL_TEXTURES: TextureOption[] = [
   { id: 'wall-brick3', name: 'Dark Brick', type: 'image', value: '/textures/walls/brick-wall3.png' },
   { id: 'wall-concrete', name: 'Concrete', type: 'image', value: '/textures/walls/concrete.jpg' },
   { id: 'wall-marble', name: 'Marble', type: 'image', value: '/textures/walls/marble.jpg' },
-  { id: 'wall-texture1', name: 'Wall Texture', type: 'image', value: '/textures/walls/wall1.png' },
 ];
 
 // Predefined floor texture options (colors + images)
 const FLOOR_TEXTURES: TextureOption[] = [
   // Solid Colors
   { id: 'floor-white', name: 'White', type: 'color', value: '#ffffff' },
-  { id: 'floor-light-gray', name: 'Light Gray', type: 'color', value: '#f9fafb' },
+  { id: 'floor-light-gray', name: 'Light Gray', type: 'color', value: '#f2f0ef' },
   { id: 'floor-dark-gray', name: 'Dark Gray', type: 'color', value: '#374151' },
   { id: 'floor-black', name: 'Black', type: 'color', value: '#111827' },
   { id: 'floor-brown', name: 'Brown', type: 'color', value: '#92400e' },
+  { id: 'floor-light-brown', name: 'Light Brown', type: 'color', value: '#b09696' },
   { id: 'floor-warm-beige', name: 'Warm Beige', type: 'color', value: '#d6d3d1' },
   
   // Image Textures
@@ -85,17 +85,17 @@ interface TextureProviderProps {
 export function TextureProvider({ children }: TextureProviderProps) {
   const [selectedSurface, setSelectedSurface] = useState<SurfaceType | null>(null);
   const [roomDimensions, setRoomDimensions] = useState<RoomDimensions>({
-    width: 15,
+    width: 25,
     height: 8,
-    depth: 15
+    depth: 20
   });
 
   const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, TextureOption>>({
-    wall1: WALL_TEXTURES.find(t => t.id === 'wall-brick2') || WALL_TEXTURES[0],
-    wall2: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0], 
-    wall3: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0],
-    wall4: WALL_TEXTURES.find(t => t.id === 'wall-texture1') || WALL_TEXTURES[0],
-    floor: FLOOR_TEXTURES.find(t => t.id === 'floor-wood2') || FLOOR_TEXTURES[0]
+    wall1: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0],
+    wall2: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0], 
+    wall3: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0],
+    wall4: WALL_TEXTURES.find(t => t.id === 'floor-light-gray') || WALL_TEXTURES[0],
+    floor: FLOOR_TEXTURES.find(t => t.id === 'floor-light-brown') || FLOOR_TEXTURES[0]
   });
 
   // Use refs to track transitions without causing re-renders
