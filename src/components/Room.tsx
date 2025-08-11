@@ -63,7 +63,7 @@ export default function Room() {
       />
 
       {/* Furnitures */}
-      <ImagePlanes/>
+      {/* <ImagePlanes/> */}
     </group>
   );
 }

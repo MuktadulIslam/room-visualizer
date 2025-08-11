@@ -20,7 +20,7 @@ export default function Scene() {
           className="absolute inset-0"
           style={{ zIndex: 1 }}
           camera={{
-            fov: 75,
+            fov: 65,
             near: 0.1,
             far: 1000,
             position: [0, 0, 0],

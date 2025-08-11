@@ -93,9 +93,9 @@ interface TextureProviderProps {
 export function TextureProvider({ children }: TextureProviderProps) {
   const [selectedSurface, setSelectedSurface] = useState<SurfaceType | null>(null);
   const [roomDimensions, setRoomDimensions] = useState<RoomDimensions>({
-    width: 25,
+    width: 15,
     height: 8,
-    depth: 20
+    depth: 15
   });
 
   const [currentTextures, setCurrentTextures] = useState<Record<SurfaceType, TextureOption>>({
